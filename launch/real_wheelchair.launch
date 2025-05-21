@@ -1,0 +1,21 @@
+<launch>
+  <!-- Load joy utility parameters -->
+  <rosparam command="load" file="$(find wheelchair_iaslab_control)/config/joy_utility_params.yaml"/>
+  
+  <!-- Launch joystick driver -->
+  <node name="joy_node" pkg="joy" type="joy_node" output="screen" required="true">
+    <param name="dev" value="/dev/input/js0"/>
+    <param name="autorepeat_rate" value="100.0"/>
+  </node>
+  
+  <!-- Launch joy to wheelchair converter node -->
+  <node name="joy_to_wheelchair" pkg="wheelchair_iaslab_control" type="joy_to_wheelchair" output="screen" required="true">
+  </node>
+  
+  <!-- Launch wheelchair controller node -->
+  <node name="wheelchair_controller" pkg="wheelchair_iaslab_control" type="wheelchair_controller" output="screen" required="true">
+    <!-- Set CAN interface parameter for real hardware -->
+    <param name="can_interface" value="can0"/>
+    <param name="rosconsole_logger_level" value="DEBUG"/>
+  </node>
+</launch> 
