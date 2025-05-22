@@ -33,6 +33,7 @@ void ControllerHandler::injectRnetJoystickFrame() {
         
     // Send the frame
     if (can_handler.sendFrame(canStr)) {
+        std::cout << "sending frame for velocity: " << canStr.c_str() << std::endl;
     } else {
         std::cerr << "Failed to send CAN frame" << std::endl;
     }

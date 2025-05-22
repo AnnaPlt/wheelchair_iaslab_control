@@ -7,6 +7,7 @@ WheelchairController::WheelchairController(ros::NodeHandle& nh) : nh_(nh) {
     
     // Initialize JoyUtility with parameters
     joy_utility_.initFromParams(nh_);
+    first_cmd_vel = false;
     
     ROS_INFO("WheelchairController initialized");
 }
@@ -17,9 +18,10 @@ WheelchairController::~WheelchairController() {
 }
 
 void WheelchairController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg) {
-    ROS_INFO("Received command velocity");
+    //ROS_INFO("Received command velocity");
     // Convert velocity to joystick values using JoyUtility
     joy_msg = joy_utility_.velocityToJoy(*msg);
+    ROS_INFO("Sending command velocity: linear: %f, angular: %f", joy_msg.axes[1], joy_msg.axes[0]);
     first_cmd_vel = true;
 }
 
@@ -57,7 +59,7 @@ void WheelchairController::modalityCallback(const std_msgs::Int8::ConstPtr& msg)
 
 
 void WheelchairController::run(){
-    ros::Rate rate(100);
+    ros::Rate rate(150);
 
     while (ros::ok()) {
         if(first_cmd_vel){

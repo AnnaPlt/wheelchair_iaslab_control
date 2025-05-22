@@ -43,11 +43,11 @@ void JoyUtility::loadProfileLevels(ros::NodeHandle& nh, int profile)
     
     // Load speed levels for the profile
     nh.param(profile_name + "/max_forward_level", current_levels_.max_forward, 100);
-    nh.param(profile_name + "/min_forward_level", current_levels_.min_forward, 20);
-    nh.param(profile_name + "/max_backward_level", current_levels_.max_backward, 40);
-    nh.param(profile_name + "/min_backward_level", current_levels_.min_backward, 10);
-    nh.param(profile_name + "/max_turning_level", current_levels_.max_turning, 50);
-    nh.param(profile_name + "/min_turning_level", current_levels_.min_turning, 15);
+    nh.param(profile_name + "/min_forward_level", current_levels_.min_forward, 25);
+    nh.param(profile_name + "/max_backward_level", current_levels_.max_backward, 25);
+    nh.param(profile_name + "/min_backward_level", current_levels_.min_backward, 20);
+    nh.param(profile_name + "/max_turning_level", current_levels_.max_turning, 20);
+    nh.param(profile_name + "/min_turning_level", current_levels_.min_turning, 20);
 }
 
 void JoyUtility::setSpeedPercentage(float percentage)
@@ -87,7 +87,7 @@ geometry_msgs::Twist JoyUtility::joyToVelocity(const sensor_msgs::Joy::ConstPtr&
         
         // Calculate final speed based on joystick position
         float speed = current_max_speed * linear_x;
-        twist.linear.x = speed;
+        twist.linear.x = linear_x;//speed;
     } else {
         // Backward movement
         float min_speed = speed_mappings_[current_levels_.min_backward];
@@ -100,7 +100,7 @@ geometry_msgs::Twist JoyUtility::joyToVelocity(const sensor_msgs::Joy::ConstPtr&
         
         // Calculate final speed based on joystick position
         float speed = current_max_speed * linear_x;
-        twist.linear.x = speed;
+        twist.linear.x = linear_x; //speed;
     }
     
     // Apply turning limits
@@ -114,7 +114,7 @@ geometry_msgs::Twist JoyUtility::joyToVelocity(const sensor_msgs::Joy::ConstPtr&
     
     // Calculate final turnin speed based on joystick position
     float turning_speed = current_max_turning * angular_z;
-    twist.angular.z = turning_speed / radius;
+    twist.angular.z = angular_z;// turning_speed / radius;
     
     //ROS_INFO("Output twist - linear: %f, angular: %f", twist.linear.x, twist.angular.z);
     
@@ -126,35 +126,35 @@ sensor_msgs::Joy JoyUtility::velocityToJoy(const geometry_msgs::Twist& twist)
     sensor_msgs::Joy joy_msg;
     joy_msg.axes.resize(2);
     
-    ROS_INFO("Input twist - linear: %f, angular: %f", twist.linear.x, twist.angular.z);
+    //ROS_INFO("Input twist - linear: %f, angular: %f", twist.linear.x, twist.angular.z);
     
     float speed_factor = current_speed_percentage_ / 100.0f;
-    ROS_INFO("Current speed percentage: %f, speed factor: %f", current_speed_percentage_, speed_factor);
+    //ROS_INFO("Current speed percentage: %f, speed factor: %f", current_speed_percentage_, speed_factor);
     
-    // Convert linear velocity to joystick value
+    /*Convert linear velocity to joystick value
     if (twist.linear.x > 0) {
         float min_speed = speed_mappings_[current_levels_.min_forward];
         float max_speed = speed_mappings_[current_levels_.max_forward];
         float current_max_speed = min_speed + (max_speed - min_speed) * speed_factor;
-        joy_msg.axes[1] = twist.linear.x * current_max_speed;
-        ROS_INFO("Forward conversion - min: %f, max: %f, current_max: %f, result: %f", 
-                min_speed, max_speed, current_max_speed, joy_msg.axes[1]);
+         // * current_max_speed;
+        //ROS_INFO("Forward conversion - min: %f, max: %f, current_max: %f, result: %f", 
+                //min_speed, max_speed, current_max_speed, joy_msg.axes[1]);
     } else {
         float min_speed = speed_mappings_[current_levels_.min_backward];
         float max_speed = speed_mappings_[current_levels_.max_backward];
         float current_max_speed = min_speed + (max_speed - min_speed) * speed_factor;
-        joy_msg.axes[1] = twist.linear.x * current_max_speed;
-        ROS_INFO("Backward conversion - min: %f, max: %f, current_max: %f, result: %f", 
-                min_speed, max_speed, current_max_speed, joy_msg.axes[1]);
-    }
-    
-    // Convert angular velocity to joystick value
+        joy_msg.axes[1] = twist.linear.x; //* current_max_speed;
+        //ROS_INFO("Backward conversion - min: %f, max: %f, current_max: %f, result: %f", 
+                //min_speed, max_speed, current_max_speed, joy_msg.axes[1]);
+    }*/
+    joy_msg.axes[1] = twist.linear.x;
+    /*Convert angular velocity to joystick value
     float min_turning = speed_mappings_[current_levels_.min_turning];
     float max_turning = speed_mappings_[current_levels_.max_turning];
-    float current_max_turning = min_turning + (max_turning - min_turning) * speed_factor;
-    joy_msg.axes[0] = (twist.angular.z * radius) * current_max_turning;
-    ROS_INFO("Turning conversion - min: %f, max: %f, current_max: %f, result: %f", 
-        min_turning, max_turning, current_max_turning, joy_msg.axes[0]);
+    float current_max_turning = min_turning + (max_turning - min_turning) * speed_factor;*/
+    joy_msg.axes[0] = twist.angular.z; //* radius) * current_max_turning;
+    //ROS_INFO("Turning conversion - min: %f, max: %f, current_max: %f, result: %f", 
+        //min_turning, max_turning, current_max_turning, joy_msg.axes[0]);
         
     return joy_msg;
 }
